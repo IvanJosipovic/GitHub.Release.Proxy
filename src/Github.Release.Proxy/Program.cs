@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using Scalar.AspNetCore;
 
 namespace Github.Release.Proxy;
 
@@ -17,6 +18,8 @@ public class Program
         new SettingsValidator().ValidateAndThrow(settings);
 
         builder.Services.AddSingleton(settings);
+
+        builder.Services.AddOpenApi();
 
         builder.Services.AddSingleton<Instrumentation>();
 
@@ -54,7 +57,7 @@ public class Program
                     })
                     .AddView("request-duration", new ExplicitBucketHistogramConfiguration
                     {
-                        Boundaries = new double[] { 0, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10 }
+                        Boundaries = [0, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
                     })
                     .AddMeter(
                         "Microsoft.AspNetCore.Hosting",
@@ -67,21 +70,24 @@ public class Program
         builder.Services.AddMetrics();
         builder.Services.AddHealthChecks();
         builder.Services.Configure<ForwardedHeadersOptions>(options => options.ForwardedHeaders = ForwardedHeaders.All);
-        builder.Services.AddHttpClient();
+        builder.Services.AddHttpClient(string.Empty).AddStandardResilienceHandler();
 
         var app = builder.Build();
         app.Logger.LogInformation("Starting Application");
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+            app.MapScalarApiReference();
+        }
         app.UseForwardedHeaders();
         app.MapPrometheusScrapingEndpoint();
         app.MapHealthChecks("/health");
 
-        app.MapGet("/release/{version}/{filename}", async (string version, string filename, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client) =>
+        app.MapGet("/release/{version}/{filename}", async (string version, string filename, [FromServices] Settings settings, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client) =>
         {
-            //https://github.com/IvanJosipovic/KubeUI/releases/download/v1.0.0-alpha.92/KubeUI-win-x64-Setup.exe
-
             instrumentation.ReleasesDownloaded.Add(1);
 
-            var stream = await client.GetStreamAsync($"https://github.com/IvanJosipovic/KubeUI/releases/download/{version}/{filename}");
+            var stream = await client.GetStreamAsync($"https://github.com/{settings.Organization}/{settings.Project}/releases/download/{version}/{filename}");
 
             return Results.File(stream, fileDownloadName: filename);
         });
