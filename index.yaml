@@ -7,18 +7,15 @@ entries:
     apiVersion: v2
     appVersion: 1.0.0-alpha.1
     created: "2025-01-08T03:53:04.939957985Z"
-    description: Prometheus Alertmanager Receiver for Azure DevOps
+    description: Simple Github Release Proxy
     digest: 792ec98a4318b33b024113ce247bb72f8177710272c024dab8c57b349483de39
-    home: https://github.com/IvanJosipovic/github-release-proxy
+    home: https://github.com/IvanJosipovic/GitHub.Release.Proxy
     keywords:
-    - prometheus
-    - alertmanager
-    - azure devops
-    - alert
-    - notification
+    - github
+    - proxy
     name: github-release-proxy
     sources:
-    - https://github.com/IvanJosipovic/github-release-proxy
+    - https://github.com/IvanJosipovic/GitHub.Release.Proxy
     type: application
     urls:
     - https://github.com/IvanJosipovic/GitHub.Release.Proxy/releases/download/github-release-proxy-1.0.0-alpha.1/github-release-proxy-1.0.0-alpha.1.tgz
