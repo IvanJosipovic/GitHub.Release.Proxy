@@ -5,7 +5,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Scalar.AspNetCore;
 
-namespace Github.Release.Proxy;
+namespace GitHub.Release.Proxy;
 
 public class Program
 {

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Metrics;
 
-namespace Github.Release.Proxy;
+namespace GitHub.Release.Proxy;
 
 public class Instrumentation
 {

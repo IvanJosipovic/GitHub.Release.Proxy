@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Github.Release.Proxy;
+namespace GitHub.Release.Proxy;
 
 public class SettingsValidator : AbstractValidator<Settings>
 {

@@ -3,14 +3,14 @@ ARG BUILDPLATFORM=linux/amd64
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine@sha256:cdc618c61fb14b297986a06ea895efe6eb49e30dfe3b2b6c8b4793e600a5f298 AS build
 RUN apk add build-base zlib-dev
 WORKDIR /src
-COPY Github.Release.Proxy.csproj .
-RUN dotnet restore "Github.Release.Proxy.csproj"
+COPY GitHub.Release.Proxy.csproj .
+RUN dotnet restore "GitHub.Release.Proxy.csproj"
 COPY . .
-RUN dotnet build "Github.Release.Proxy.csproj" -c Release -o /app/build
+RUN dotnet build "GitHub.Release.Proxy.csproj" -c Release -o /app/build
 
 FROM build AS publish
 ARG VERSION=0.0.1
-RUN dotnet publish "Github.Release.Proxy.csproj" -c Release --use-current-runtime -o /app/publish /p:Version=${VERSION}
+RUN dotnet publish "GitHub.Release.Proxy.csproj" -c Release --use-current-runtime -o /app/publish /p:Version=${VERSION}
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine@sha256:af88eef3a293a3d57b49f1e9114f6a6b17f7525c651ef257262c10ab5b8cd1bf AS base
 WORKDIR /app
@@ -57,4 +57,4 @@ RUN apk add --upgrade --no-cache \
 USER app
 
 COPY --from=publish /app/publish .
-ENTRYPOINT ["./Github.Release.Proxy"]
+ENTRYPOINT ["./GitHub.Release.Proxy"]

@@ -1,4 +1,4 @@
-﻿namespace Github.Release.Proxy;
+﻿namespace GitHub.Release.Proxy;
 
 public class Settings
 {
