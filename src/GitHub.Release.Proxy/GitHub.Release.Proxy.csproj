@@ -30,7 +30,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.EventCounters" Version="1.5.1-alpha.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.0" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.0.7" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.0.9" />
   </ItemGroup>
 
 </Project>
