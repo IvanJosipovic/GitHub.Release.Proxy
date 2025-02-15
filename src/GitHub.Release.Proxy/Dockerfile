@@ -1,6 +1,6 @@
 ARG BUILDPLATFORM=linux/amd64
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.21@sha256:a9d99ca1f16b123abd916a9e95b4304c3d3e03e86781e24ca565119badd5cad6 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.21@sha256:c439a8d5fef241d04858145e777a460ec0e6c8fec8e518b41cdee4e37321f306 AS build
 RUN apk add build-base zlib-dev
 WORKDIR /src
 COPY GitHub.Release.Proxy.csproj .
@@ -12,7 +12,7 @@ FROM build AS publish
 ARG VERSION=0.0.1
 RUN dotnet publish "GitHub.Release.Proxy.csproj" -c Release --use-current-runtime -o /app/publish /p:Version=${VERSION}
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine3.21@sha256:beee9ae3599b372ad6d1f860d690d22f53180da1f0c3afae7875c3ee9acf51a7 AS base
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine3.21@sha256:33a2de58e8f1ce60cf1b00268c7a3a8ecbadbc1cee6d84cdd8b7f931199d3c0e AS base
 WORKDIR /app
 EXPOSE 8080
 
