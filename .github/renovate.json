@@ -54,9 +54,17 @@
       "automerge": true,
       "semanticCommitType": "fix",
       "matchPackageNames": [
-        "alpine_*/ca-certificates-bundle"
+        "alpine_*"
       ]
-    }
+    },
+    {
+      "groupName": "Dockerfile",
+      "separateMajorMinor": false,
+      "groupSlug": "dockerfile",
+      "matchPackageNames": [
+        "alpine_*"
+      ]
+    },
   ],
   "customManagers": [
     {
