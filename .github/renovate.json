@@ -2,7 +2,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "enabled": true,
   "timezone": "America/Vancouver",
-  "dependencyDashboard": true,
   "semanticCommits": "enabled",
   "assignees": [
     "@ivanjosipovic"
@@ -31,6 +30,18 @@
       "respectLatest": false
     },
     {
+      "automerge": true,
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "matchFileNames": [
+        "global.json"
+      ]
+    },
+    {
+      "automerge": true,
       "matchUpdateTypes": [
         "minor",
         "patch",
@@ -39,8 +50,7 @@
       "automerge": true,
       "semanticCommitType": "fix",
       "matchFileNames": [
-        "src/**",
-        "global.json"
+        "src/**"
       ]
     },
     {
@@ -63,15 +73,9 @@
         "digest"
       ],
       "automerge": true,
+      "groupName": "Dockerfile Dependecies",
+      "groupSlug": "dockerfile-dependecies",
       "semanticCommitType": "fix",
-      "matchPackageNames": [
-        "alpine_*"
-      ]
-    },
-    {
-      "groupName": "Dockerfile",
-      "separateMajorMinor": false,
-      "groupSlug": "dockerfile",
       "matchPackageNames": [
         "alpine_*"
       ]
