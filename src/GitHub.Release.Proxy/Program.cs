@@ -34,10 +34,9 @@ public class Program
 
         builder.Logging.AddFilter("Default", settings.LogLevel);
         builder.Logging.AddFilter("Github", settings.LogLevel);
-        builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+        builder.Logging.AddFilter("Microsoft.AspNetCore", settings.LogLevel);
         builder.Logging.AddFilter("Microsoft.Extensions.Diagnostics.HealthChecks", LogLevel.Warning);
         builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
-        builder.Logging.AddFilter("Microsoft.AspNetCore.DataProtection", LogLevel.Error);
 
         builder.Services
             .AddOpenTelemetry()
@@ -74,15 +73,17 @@ public class Program
 
         var app = builder.Build();
         app.Logger.LogInformation("Starting Application");
+
+        app.MapOpenApi();
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
             app.MapScalarApiReference();
         }
         app.UseForwardedHeaders();
         app.MapPrometheusScrapingEndpoint();
         app.MapHealthChecks("/health");
 
+        //[Obsolete]
         app.MapGet("/release/{version}/{filename}", async (string version, string filename, [FromServices] Settings settings, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client) =>
         {
             instrumentation.ReleasesDownloaded.Add(1);
@@ -90,6 +91,15 @@ public class Program
             var stream = await client.GetStreamAsync($"https://github.com/{settings.Organization}/{settings.Project}/releases/download/{version}/{filename}");
 
             return Results.File(stream, fileDownloadName: filename);
+        });
+
+        app.MapGet("/releases/download/{version}/{artifactName}", async (string version, string artifactName, [FromServices] Settings settings, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client) =>
+        {
+            instrumentation.ReleasesDownloaded.Add(1);
+
+            var stream = await client.GetStreamAsync($"https://github.com/{settings.Organization}/{settings.Project}/releases/download/{version}/{artifactName}");
+
+            return Results.File(stream, fileDownloadName: artifactName);
         });
 
         app.Run();

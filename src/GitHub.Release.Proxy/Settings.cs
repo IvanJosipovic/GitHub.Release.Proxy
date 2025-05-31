@@ -2,7 +2,7 @@
 
 public class Settings
 {
-    public LogLevel LogLevel { get; set; }
+    public LogLevel LogLevel { get; set; } = LogLevel.Information;
 
     public LogFormat LogFormat { get; set; }
 
