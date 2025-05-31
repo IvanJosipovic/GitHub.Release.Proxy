@@ -79,6 +79,16 @@
       "matchPackageNames": [
         "alpine_*"
       ]
+    },
+    {
+      "automerge": true,
+      "semanticCommitType": "chore",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Scalar.AspNetCore"
+      ]
     }
   ],
   "customManagers": [
