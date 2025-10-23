@@ -23,6 +23,12 @@
         "preset": "conventionalcommits"
       }
     ],
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "charts/github-release-proxy/CHANGELOG.md"
+      }
+    ],
     "@semantic-release/github"
   ]
 }
