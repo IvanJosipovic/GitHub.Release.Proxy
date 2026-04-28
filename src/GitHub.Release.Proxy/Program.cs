@@ -4,8 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Scalar.AspNetCore;
+using Microsoft.Extensions.Caching.Memory;
+using System.IO;
 
 namespace GitHub.Release.Proxy;
+
+internal sealed record CachedRelease(byte[] Content, string ContentType, long? ContentLength, string FileName);
 
 public class Program
 {
@@ -68,6 +72,7 @@ public class Program
 
         builder.Services.AddMetrics();
         builder.Services.AddHealthChecks();
+        builder.Services.AddMemoryCache();
         builder.Services.Configure<ForwardedHeadersOptions>(options => options.ForwardedHeaders = ForwardedHeaders.All);
         builder.Services.AddHttpClient(string.Empty).AddStandardResilienceHandler();
 
@@ -83,23 +88,58 @@ public class Program
         app.MapPrometheusScrapingEndpoint();
         app.MapHealthChecks("/health");
 
-        //[Obsolete]
-        app.MapGet("/release/{version}/{filename}", async (string version, string filename, [FromServices] Settings settings, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client) =>
+        // Local helper to fetch and optionally cache release artifacts
+        async Task ServeReleaseAsync(string cacheKey, string requestUrl, string fileName, HttpContext httpContext, Settings settings, Instrumentation instrumentation, HttpClient client, IMemoryCache cache)
         {
             instrumentation.ReleasesDownloaded.Add(1);
 
-            var stream = await client.GetStreamAsync($"https://github.com/{settings.Organization}/{settings.Project}/releases/download/{version}/{filename}");
+            if (cache.TryGetValue<CachedRelease>(cacheKey, out var cached) && cached is not null)
+            {
+                httpContext.Response.ContentType = cached.ContentType;
+                if (cached.ContentLength.HasValue)
+                {
+                    httpContext.Response.ContentLength = cached.ContentLength.Value;
+                }
+                httpContext.Response.Headers["Content-Disposition"] = $"attachment; filename=\"{cached.FileName}\"";
 
-            return Results.File(stream, fileDownloadName: filename);
+                await httpContext.Response.Body.WriteAsync(cached.Content, httpContext.RequestAborted);
+                return;
+            }
+
+            using var response = await client.GetAsync(requestUrl, HttpCompletionOption.ResponseHeadersRead, httpContext.RequestAborted);
+            response.EnsureSuccessStatusCode();
+
+            var contentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
+            var contentBytes = await response.Content.ReadAsByteArrayAsync(httpContext.RequestAborted);
+
+            var toCache = new CachedRelease(contentBytes, contentType, response.Content.Headers.ContentLength, fileName);
+            cache.Set(cacheKey, toCache, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(10) });
+
+            httpContext.Response.ContentType = contentType;
+            if (response.Content.Headers.ContentLength.HasValue)
+            {
+                httpContext.Response.ContentLength = response.Content.Headers.ContentLength.Value;
+            }
+            httpContext.Response.Headers["Content-Disposition"] = $"attachment; filename=\"{fileName}\"";
+
+            await httpContext.Response.Body.WriteAsync(contentBytes, httpContext.RequestAborted);
+        }
+
+        //[Obsolete]
+        app.MapGet("/release/{version}/{filename}", (string version, string filename, HttpContext httpContext, [FromServices] Settings settings, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client, [FromServices] IMemoryCache cache) =>
+        {
+            var cacheKey = $"release:{settings.Organization}:{settings.Project}:{version}:{filename}";
+            var requestUrl = $"https://github.com/{settings.Organization}/{settings.Project}/releases/download/{version}/{filename}";
+
+            return ServeReleaseAsync(cacheKey, requestUrl, filename, httpContext, settings, instrumentation, client, cache);
         });
 
-        app.MapGet("/releases/download/{version}/{artifactName}", async (string version, string artifactName, [FromServices] Settings settings, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client) =>
+        app.MapGet("/releases/download/{version}/{artifactName}", (string version, string artifactName, HttpContext httpContext, [FromServices] Settings settings, [FromServices] Instrumentation instrumentation, [FromServices] HttpClient client, [FromServices] IMemoryCache cache) =>
         {
-            instrumentation.ReleasesDownloaded.Add(1);
+            var cacheKey = $"release:{settings.Organization}:{settings.Project}:{version}:{artifactName}";
+            var requestUrl = $"https://github.com/{settings.Organization}/{settings.Project}/releases/download/{version}/{artifactName}";
 
-            var stream = await client.GetStreamAsync($"https://github.com/{settings.Organization}/{settings.Project}/releases/download/{version}/{artifactName}");
-
-            return Results.File(stream, fileDownloadName: artifactName);
+            return ServeReleaseAsync(cacheKey, requestUrl, artifactName, httpContext, settings, instrumentation, client, cache);
         });
 
         app.Run();
