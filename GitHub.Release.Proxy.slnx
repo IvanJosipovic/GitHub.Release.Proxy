@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Project Path="src/GitHub.Release.Proxy/GitHub.Release.Proxy.csproj" />
