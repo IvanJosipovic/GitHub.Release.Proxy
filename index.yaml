@@ -5,6 +5,25 @@ entries:
       artifacthub.io/category: networking
       artifacthub.io/license: MIT
     apiVersion: v2
+    appVersion: 1.0.0-alpha.134
+    created: "2026-10-14T10:10:38.66216809Z"
+    description: Simple Github Release Proxy
+    digest: 63e27acdc4266faa1d4363934ed376fce7dea608807a18535a5dec55f3a3dc25
+    home: https://github.com/IvanJosipovic/GitHub.Release.Proxy
+    keywords:
+    - github
+    - proxy
+    name: github-release-proxy
+    sources:
+    - https://github.com/IvanJosipovic/GitHub.Release.Proxy
+    type: application
+    urls:
+    - https://github.com/IvanJosipovic/GitHub.Release.Proxy/releases/download/github-release-proxy-1.0.0-alpha.134/github-release-proxy-1.0.0-alpha.134.tgz
+    version: 1.0.0-alpha.134
+  - annotations:
+      artifacthub.io/category: networking
+      artifacthub.io/license: MIT
+    apiVersion: v2
     appVersion: 1.0.0-alpha.133
     created: "2026-10-11T08:35:15.341246292Z"
     description: Simple Github Release Proxy
@@ -2528,4 +2547,4 @@ entries:
     urls:
     - https://github.com/IvanJosipovic/GitHub.Release.Proxy/releases/download/github-release-proxy-1.0.0-alpha.1/github-release-proxy-1.0.0-alpha.1.tgz
     version: 1.0.0-alpha.1
-generated: "2026-10-11T08:35:15.341933467Z"
+generated: "2026-10-14T10:10:38.663457995Z"
